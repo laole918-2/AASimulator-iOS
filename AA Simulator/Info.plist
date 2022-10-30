@@ -4,6 +4,11 @@
 <dict>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1144530986936310~8009394174</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
