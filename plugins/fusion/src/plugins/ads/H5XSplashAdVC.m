@@ -23,6 +23,7 @@
 @property (strong, nonatomic) dispatch_source_t skipTimer;
 
 @property (assign, nonatomic) BOOL timeout;
+@property (assign, nonatomic) BOOL isAdClicked;
 
 @end
 
@@ -72,19 +73,18 @@
     self.loadTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
     dispatch_source_set_timer(self.loadTimer, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), 1 * NSEC_PER_SEC, 0);
     dispatch_source_set_event_handler(self.loadTimer, ^{
-        if (_weakSelf) {
-            dispatch_source_cancel(_weakSelf.loadTimer);
-            _weakSelf.loadTimer = nil;
-            _weakSelf.timeout = YES;
-            _weakSelf.splashWindow.hidden = YES;
+        __strong typeof (_weakSelf) _strongSelf = _weakSelf;
+        dispatch_source_cancel(_strongSelf.loadTimer);
+        _strongSelf.loadTimer = nil;
+        _strongSelf.timeout = YES;
+        _strongSelf.splashWindow.hidden = YES;
             
-            NSDictionary * ext = @{
-                @"type": @(0),
-                @"code": @(0),
-                @"msg": @"time out"
-            };
-            [_weakSelf callbackHandler:@"onError" ext:ext];
-        }
+        NSDictionary * ext = @{
+            @"type": @(0),
+            @"code": @(0),
+            @"msg": @"time out"
+        };
+        [_strongSelf callbackHandler:@"onError" ext:ext];
     });
     dispatch_resume(self.loadTimer);
 }
@@ -181,15 +181,15 @@
     dispatch_source_set_timer(self.skipTimer, DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(self.skipTimer, ^{
         if (second == 0) {
-            if (_weakSelf) {
-                [_weakSelf onAdClosed];
-                dispatch_source_cancel(_weakSelf.skipTimer);
-                _weakSelf.skipTimer = nil;
+            __strong typeof (_weakSelf) _strongSelf = _weakSelf;
+            if (!_strongSelf.isAdClicked) {
+                [_strongSelf onAdClosed];
             }
+            dispatch_source_cancel(_strongSelf.skipTimer);
+            _strongSelf.skipTimer = nil;
         } else {
-            if (_weakSkip) {
-                _weakSkip.text = [NSString stringWithFormat:@"Skip %d", second];
-            }
+            __strong typeof (_weakSkip) _strongSkip = _weakSkip;
+            _strongSkip.text = [NSString stringWithFormat:@"Skip %d", second];
             second--;
         }
     });
@@ -250,6 +250,7 @@ didFailToReceiveAdWithError:(nonnull NSError *)error {
 /// mediated ads.
 - (void)nativeAdDidRecordClick:(nonnull GADNativeAd *)nativeAd {
     [self callbackHandler:@"onAdClicked"];
+    self.isAdClicked = YES;
 }
 
 #pragma mark - Click-Time Lifecycle Notifications
@@ -267,7 +268,7 @@ didFailToReceiveAdWithError:(nonnull NSError *)error {
 
 /// Called before dismissing a full screen view.
 - (void)nativeAdWillDismissScreen:(nonnull GADNativeAd *)nativeAd {
-    
+    self.splashWindow.hidden = YES;
 }
 
 /// Called after dismissing a full screen view. Use this opportunity to restart anything you may

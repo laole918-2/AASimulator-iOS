@@ -6,7 +6,7 @@
 //
 
 #import "AppDelegate.h"
-#import <Flurry-iOS-SDK/Flurry.h>
+#import "H5XStatisticPlugin.h"
 #import "H5XFusionAdPlugin.h"
 
 @interface AppDelegate ()
@@ -18,20 +18,12 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-#ifdef DEBUG
-    FlurryLogLevel logLevel = FlurryLogLevelDebug;
-#else
-    FlurryLogLevel logLevel = FlurryLogLevelNone;
-#endif
-    [Flurry startSession:@"FZVW6T8BDVKH7WSHFFPH"
-       withSessionBuilder:[[[FlurrySessionBuilder new]
-          withCrashReporting:YES]
-          withLogLevel:logLevel]];
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (NSArray<H5XPlugin *> *)getPlugins {
     NSMutableArray<H5XPlugin *> * plugins = [NSMutableArray new];
+    [plugins addObject:[[H5XStatisticPlugin alloc] init]];
     [plugins addObject:[[H5XFusionAdPlugin alloc] init]];
     return plugins;
 }

@@ -26,27 +26,31 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    NSString * appName = [[NSBundle mainBundle].infoDictionary objectForKey:@"H5X_APP_NAME"];
+    NSString *path = [[NSBundle mainBundle] pathForResource:[NSString stringWithFormat:@"assets/h5x/games/%@/h5x/manifest.json", appName] ofType:nil];
+    NSData *data = path ? [[NSData alloc] initWithContentsOfFile:path] : nil;
+    NSDictionary * manifestJSONObject = data ? [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil] : nil;
+    
     [self.plugins addObject:[[H5XToastPlugin alloc] init]];
     NSArray<H5XPlugin *> * plugins = [self getPlugins];
     if (plugins && plugins.count > 0) {
         [self.plugins addObjectsFromArray:plugins];
     }
-//            JSONObject pluginsJSONObject = null;
-//            if (manifestJSONObject != null) {
-//                pluginsJSONObject = manifestJSONObject.optJSONObject("plugins");
-//            }
-    for (H5XPlugin * plugin in self.plugins) {
-//                JSONObject infoJSONObject = null;
-//                if (pluginsJSONObject != null) {
-//                    infoJSONObject = pluginsJSONObject.optJSONObject(plugin.name());
-//                    if (infoJSONObject != null && infoJSONObject.has("android")) {
-//                        infoJSONObject = infoJSONObject.optJSONObject("android");
-//                    }
-//                }
-//        plugin.onAppCreate(this, infoJSONObject != null ? infoJSONObject : new JSONObject());
-        [plugin onAppDelegateCreate:self info:nil];
+    NSDictionary *pluginsJSONObject = nil;
+    if (manifestJSONObject) {
+        pluginsJSONObject = [manifestJSONObject valueForKey:@"plugins"];
     }
-    NSString * rootDir = [[NSBundle mainBundle].resourcePath stringByAppendingPathComponent:@"/assets/h5x/games/AA Simulator/"];
+    for (H5XPlugin * plugin in self.plugins) {
+        NSDictionary * infoJSONObject = nil;
+        if (pluginsJSONObject) {
+            infoJSONObject = [pluginsJSONObject valueForKey:plugin.name];
+            if ([infoJSONObject valueForKey:@"ios"]) {
+                infoJSONObject = [infoJSONObject valueForKey:@"ios"];
+            }
+        }
+        [plugin onAppDelegateCreate:self info:infoJSONObject ? infoJSONObject : [NSDictionary new]];
+    }
+    NSString * rootDir = [[NSBundle mainBundle].resourcePath stringByAppendingPathComponent:[NSString stringWithFormat:@"/assets/h5x/games/%@/", appName]];
     self.webServer = [[GCDWebServer alloc] init];
     [self.webServer addGETHandlerForBasePath:@"/" directoryPath:rootDir indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
     [self.webServer startWithPort:18080 bonjourName:@""];

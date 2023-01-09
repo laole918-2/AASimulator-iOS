@@ -33,15 +33,13 @@
 }
 
 - (NSString *)name {
-    return @"Ad";
+    return @"ad";
 }
 
 - (void)onAppDelegateCreate:(H5XAppDelegate *)delegate info:(NSDictionary *)info {
-//    NSString *app_id = [info objectForKey:@"app_id"];
-//    if ([[info allKeys] containsObject:@"splash_id"]) {
-//        self.splashId = [info objectForKey:@"splash_id"];
-//    }
-    self.splashId = @"ca-app-pub-1144530986936310/8872733915";
+    if ([[info allKeys] containsObject:@"splash_id"]) {
+        self.splashId = [info objectForKey:@"splash_id"];
+    }
 }
 
 - (void)onAppDidEnterBackground:(UIApplication *)application {

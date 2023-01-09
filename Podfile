@@ -12,7 +12,7 @@ project 'AA Simulator'
 target 'AA Simulator' do
   pod 'library', :path => 'library'
   pod 'fusion', :path => 'plugins/fusion'
-  pod 'Flurry-iOS-SDK/FlurrySDK'
+  pod 'statistic', :path => 'plugins/statistic'
   project 'AA Simulator'
 end
 
